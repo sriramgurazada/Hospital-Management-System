@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Search</title>
+    <script>
+function fetchPatientData(event) {
+    event.preventDefault();  // Prevent the default form submission behavior
+
+    const patientId = document.getElementById('patientId').value;  // Get the patient ID from the input field
+
+    // Update the GraphQL query to use the correct argument name (_id) and ensure it's provided
+    const query = `
+        query {
+            patient(_id: "${patientId}") {
+                _id
+                firstName
+                lastName
+                height
+                weight
+                temperature
+                doctor {
+                    firstName
+                    lastName
+                    qualification
+                }
+                doctorFeedback
+            }
+        }
+    `;
+
+    const url = 'http://localhost:8000/graphql';  // Define the API URL
+
+    // Use fetch API to send the GraphQL request
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({ query })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);  // Log the response data
+        // Display the results
+        document.getElementById('results').textContent = JSON.stringify(data, null, 2);
+    })
+    .catch(error => {
+        console.error('Error fetching data: ', error);
+        document.getElementById('results').textContent = 'Error fetching data. Check console for more details.';
+    });
+}
+
+    </script>
+</head>
+<body>
+    <h1>Patient ID Search</h1>
+    <form onsubmit="fetchPatientData(event)">
+        <input type="text" id="patientId" placeholder="Enter Patient ID" required>
+        <button type="submit">Search</button>
+    </form>
+    <pre id="results"></pre> <!-- Element to display the results -->
+</body>
+</html>
